@@ -42,7 +42,7 @@ export const authService = {
             return false;
         }
     },
-    async getUser() {
+    async getCurrentUser() {
         try {
             const response = await account.get();
 
@@ -52,7 +52,7 @@ export const authService = {
                 const userAvatar = await avatar.getInitials(response.name);
 
                 return {
-                    response,
+                    ...response,
                     avatar: userAvatar.toString(),
                 };
             }
