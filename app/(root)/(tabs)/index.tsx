@@ -1,30 +1,66 @@
 import { Card, FeaturedCard } from "@/components/Card";
 import Filter from "@/components/Filter";
+import NoResult from "@/components/NoResult";
 import Search from "@/components/Search";
 import icons from "@/constants/icons";
-import images from "@/constants/images";
 import { useGlobalContext } from "@/context/global-provider";
-import seed from "@/services/seed";
-import { Link } from "expo-router";
-import { Button, FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { useAppwrite } from "@/hooks/useAppwrite";
+import { propertyService } from "@/services/property";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
+    const router = useRouter();
     const { user } = useGlobalContext();
+    const params = useLocalSearchParams<{ query?: string; filter?: string }>();
+    const { data: latestProperties, loading: latestPropertiesLoading } = useAppwrite({
+        fn: propertyService.getProperties,
+    });
+    const {
+        data: properties,
+        loading: propertiesLoading,
+        refetch: propertiesRefetch,
+    } = useAppwrite({
+        fn: propertyService.getProperties,
+        params: {
+            filter: params.filter!,
+            query: params.query!,
+            limit: 6,
+        },
+        skip: true,
+    });
+
+    useEffect(() => {
+        propertiesRefetch({
+            filter: params.filter!,
+            query: params.query!,
+            limit: 6,
+        });
+    }, [params.filter, params.query]);
+
+    const handleCardPress = (id: string) => router.push(`/properties/${id}`);
 
     return (
         <SafeAreaView className="bg-white h-full overflow-hidden">
-            <Button title="seed" onPress={seed} />
             <FlatList
-                data={[1, 2, 3, 4]}
-                renderItem={({ item }) => <Card />}
-                keyExtractor={(item) => item.toString()}
+                data={properties}
+                renderItem={({ item }) => <Card item={item} onPress={() => handleCardPress(item.$id)} />}
+                keyExtractor={(item) => item.$id}
                 numColumns={2}
                 contentContainerClassName="pb-32"
                 columnWrapperClassName="flex gap-5 px-5"
                 showsVerticalScrollIndicator={false}
+                ListEmptyComponent={
+                    propertiesLoading ? (
+                        <ActivityIndicator size="large" className="color-primary-300 mt-5" />
+                    ) : (
+                        <NoResult />
+                    )
+                }
                 ListHeaderComponent={
-                    <View className="px-5 ">
+                    <View className="px-5">
                         <View className="flex flex-row items-center justify-between mt-5">
                             <View className="flex flex-row">
                                 <Image source={{ uri: user?.avatar }} className="size-12 rounded-full" />
@@ -48,14 +84,23 @@ export default function Index() {
                             </View>
 
                             <FlatList
-                                data={[1, 2, 3]}
-                                renderItem={({ item }) => <FeaturedCard />}
-                                keyExtractor={(item) => item.toString()}
+                                data={latestProperties}
+                                renderItem={({ item }) => (
+                                    <FeaturedCard item={item} onPress={() => handleCardPress(item.$id)} />
+                                )}
+                                keyExtractor={(item) => item.$id}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerClassName="mt-3 flex gap-5"
                                 className="overflow-visible"
                                 bounces={false}
+                                ListEmptyComponent={
+                                    latestPropertiesLoading ? (
+                                        <ActivityIndicator size="large" className="color-primary-300 mt-5" />
+                                    ) : (
+                                        <NoResult />
+                                    )
+                                }
                             />
                         </View>
 

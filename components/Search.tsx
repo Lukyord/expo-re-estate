@@ -10,10 +10,11 @@ const Search = () => {
     const params = useLocalSearchParams<{ query?: string }>();
     const [search, setSearch] = useState(params.query || "");
 
-    const debounce = useDebouncedCallback((text: string) => router.setParams({ query: text }), 500);
+    const debouncedSearch = useDebouncedCallback((text: string) => router.setParams({ query: text }), 500);
 
     const handleSearch = (text: string) => {
         setSearch(text);
+        debouncedSearch(text);
     };
 
     return (
