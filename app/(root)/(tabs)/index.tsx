@@ -4,8 +4,9 @@ import Search from "@/components/Search";
 import icons from "@/constants/icons";
 import images from "@/constants/images";
 import { useGlobalContext } from "@/context/global-provider";
+import seed from "@/services/seed";
 import { Link } from "expo-router";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { Button, FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
@@ -13,6 +14,7 @@ export default function Index() {
 
     return (
         <SafeAreaView className="bg-white h-full overflow-hidden">
+            <Button title="seed" onPress={seed} />
             <FlatList
                 data={[1, 2, 3, 4]}
                 renderItem={({ item }) => <Card />}
