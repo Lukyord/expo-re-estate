@@ -9,6 +9,12 @@ import { useAppwrite } from "@/hooks/useAppwrite";
 import { propertyService } from "@/services/property";
 import NoResult from "@/components/NoResult";
 import GallerySwiper from "@/components/property/GallerySwiper";
+import PropertyHeader from "@/components/property/PropertyHeader";
+import Agent from "@/components/property/Agent";
+import TopButtons from "@/components/property/TopButtons";
+import Facilities from "@/components/property/Facilities";
+import Map from "@/components/property/Map";
+import Reviews from "@/components/property/Reviews";
 
 const PropertyScreen = () => {
     const router = useRouter();
@@ -24,27 +30,37 @@ const PropertyScreen = () => {
     return (
         <SafeAreaView className="bg-white h-full overflow-hidden">
             <ScrollView className="relative">
-                <View className="flex flex-row justify-between absolute top-[5vw] left-[5vw] w-[calc(100vw-10vw)] z-10">
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        className="flex flex-row bg-primary-200 rounded-full size-11 items-center justify-center"
-                    >
-                        <Image source={icons.backArrow} className="size-5" />
-                    </TouchableOpacity>
+                <TopButtons />
 
-                    <View className="flex flex-row items-center gap-2">
-                        <TouchableOpacity className="flex flex-row bg-primary-200 rounded-full size-11 items-center justify-center">
-                            <Image source={icons.heart} className="size-5" tintColor="black" />
-                        </TouchableOpacity>
-                        <TouchableOpacity className="flex flex-row bg-primary-200 rounded-full size-11 items-center justify-center">
-                            <Image source={icons.send} className="size-5" tintColor="black" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
+                {/* GALLERY */}
                 <GallerySwiper property={property} propertyLoading={propertyLoading} />
 
-                <View className="h-[200vh] bg-red-500"></View>
+                {/* PROPERTY DETAILS */}
+                <View className="p-6 flex flex-col gap-8">
+                    {/* Header */}
+                    <PropertyHeader property={property} />
+
+                    {/* Separator */}
+                    <View className="w-full h-0 border-t-primary-200 border-t-[1px]"></View>
+
+                    {/* Agent */}
+                    <Agent property={property} />
+
+                    {/* Overview */}
+                    <View>
+                        <Text className="text-xl font-rubik-bold">Overview</Text>
+                        <Text className="text-base font-rubik-medium text-black-200">{property?.description}</Text>
+                    </View>
+
+                    {/* Facilities */}
+                    <Facilities property={property} />
+
+                    {/* Map */}
+                    <Map property={property} />
+
+                    {/* Reviews */}
+                    <Reviews property={property} />
+                </View>
             </ScrollView>
         </SafeAreaView>
     );
