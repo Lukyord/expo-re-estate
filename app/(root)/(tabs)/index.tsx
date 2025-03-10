@@ -54,7 +54,7 @@ export default function Index() {
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
                     propertiesLoading ? (
-                        <ActivityIndicator size="large" className="color-primary-300 mt-5" />
+                        <ActivityIndicator size="large" className="color-primary-300 mt-5 w-full mx-auto" />
                     ) : (
                         <NoResult />
                     )
@@ -96,7 +96,10 @@ export default function Index() {
                                 bounces={false}
                                 ListEmptyComponent={
                                     latestPropertiesLoading ? (
-                                        <ActivityIndicator size="large" className="color-primary-300 mt-5" />
+                                        <ActivityIndicator
+                                            size="large"
+                                            className="color-primary-300 h-80 w-full mx-auto"
+                                        />
                                     ) : (
                                         <NoResult />
                                     )
