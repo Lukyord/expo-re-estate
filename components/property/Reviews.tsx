@@ -1,45 +1,48 @@
-import { View, Text, Image, Animated, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { Models } from "react-native-appwrite";
+import Animated, {
+    useAnimatedRef,
+    useSharedValue,
+    useAnimatedStyle,
+    runOnUI,
+    measure,
+    useDerivedValue,
+    withTiming,
+} from "react-native-reanimated";
 
 type props = {
     property: Models.Document | null;
 };
 
-const AccordionItem = ({
-    review,
-    isOpen,
-    onPress,
-}: {
-    review: Models.Document;
-    isOpen: boolean;
-    onPress: () => void;
-}) => {
-    const animation = useRef(new Animated.Value(0)).current;
-    const [contentHeight, setContentHeight] = useState(0);
+const AccordionItem = ({ review }: { review: Models.Document }) => {
+    const listRef = useAnimatedRef();
+    const heightValue = useSharedValue(0);
+    const open = useSharedValue(false);
+    const progress = useDerivedValue(() => (open.value ? withTiming(1) : withTiming(0)));
 
-    useEffect(() => {
-        Animated.timing(animation, {
-            toValue: isOpen ? 50 + contentHeight : 50,
-            duration: 300,
-            useNativeDriver: false,
-        }).start();
-    }, [isOpen, contentHeight]);
+    const heightAnimationStyle = useAnimatedStyle(() => ({
+        height: heightValue.value,
+    }));
+
+    const iconStyle = useAnimatedStyle(() => ({
+        transform: [{ rotate: `${progress.value * 180}deg` }],
+    }));
 
     return (
-        <Animated.View
-            style={[
-                {
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    height: animation,
-                },
-            ]}
-            className="mb-2 overflow-hidden rounded-lg relative"
-        >
+        <Animated.View className="mb-2 overflow-hidden rounded-lg relative border border-gray-200">
             <TouchableOpacity
                 onPress={() => {
-                    onPress();
+                    if (heightValue.value === 0) {
+                        runOnUI(() => {
+                            "worklet";
+                            heightValue.value = withTiming(measure(listRef)!.height);
+                        })();
+                    } else {
+                        heightValue.value = withTiming(0);
+                    }
+
+                    open.value = !open.value;
                 }}
             >
                 <View className="flex flex-row items-center justify-between gap-4 p-3 h-[50px]">
@@ -47,22 +50,22 @@ const AccordionItem = ({
                         <Image source={{ uri: review.avatar }} className="w-10 h-10 rounded-full" />
                         <Text className="text-sm font-rubik-medium">{review.name}</Text>
                     </View>
-                    <Animated.View>
-                        <Text>{isOpen ? "▲" : "▼"}</Text>
+                    <Animated.View style={iconStyle}>
+                        <Text>▼</Text>
                     </Animated.View>
                 </View>
             </TouchableOpacity>
-            <Animated.View
-                className="p-4 absolute top-[50px]"
-                onLayout={(event) => setContentHeight(event.nativeEvent.layout.height)}
-            >
-                <Text className="text-sm font-rubik-medium">{review.rating}</Text>
-                <Text className="text-sm font-rubik-medium  text-black">
-                    {review.review}
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet
-                    consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur adipisicing
-                    elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.
-                </Text>
+            <Animated.View style={heightAnimationStyle}>
+                <Animated.View ref={listRef} className="p-4 absolute top-100%">
+                    <Text className="text-sm font-rubik-medium">{review.rating}</Text>
+                    <Text className="text-sm font-rubik-medium  text-black">
+                        {review.review}
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit
+                        amet consectetur adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur
+                        adipisicing elit. Quisquam, quos. Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Quisquam, quos.
+                    </Text>
+                </Animated.View>
             </Animated.View>
         </Animated.View>
     );
@@ -77,15 +80,7 @@ const Reviews = ({ property }: props) => {
 
             <View className="mt-4">
                 {property?.reviews.map((review: Models.Document, index: number) => (
-                    <AccordionItem
-                        key={review.$id}
-                        review={review}
-                        isOpen={activeIndex === index}
-                        onPress={() => {
-                            const newIndex = activeIndex === index ? -1 : index;
-                            setActiveIndex(newIndex);
-                        }}
-                    />
+                    <AccordionItem key={review.$id} review={review} />
                 ))}
             </View>
         </View>

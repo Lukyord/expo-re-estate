@@ -28,8 +28,8 @@ const PropertyScreen = () => {
     });
 
     return (
-        <SafeAreaView className="bg-white h-full overflow-hidden">
-            <ScrollView className="relative">
+        <SafeAreaView className="bg-white h-full overflow-hidden flex flex-col flex-grow">
+            <ScrollView className="relative flex-grow-1">
                 <TopButtons />
 
                 {/* GALLERY */}
@@ -62,6 +62,17 @@ const PropertyScreen = () => {
                     <Reviews property={property} />
                 </View>
             </ScrollView>
+            <View className="bg-primary-white  border-primary-200 border-[1px] border-b-0 h-30 rounded-t-2xl overflow-hidden flex-shrink-0">
+                <View className="flex flex-row items-center gap-8 p-8">
+                    <View>
+                        <Text className="text-base font-rubik-medium text-black-200">Price</Text>
+                        <Text className="text-xl font-rubik-bold text-black">${property?.price}</Text>
+                    </View>
+                    <TouchableOpacity className="bg-primary-300 rounded-full p-4 flex-grow shadow-lg shadow-primary-200">
+                        <Text className="text-base font-rubik-medium text-white text-center">Book Now</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
         </SafeAreaView>
     );
 };
